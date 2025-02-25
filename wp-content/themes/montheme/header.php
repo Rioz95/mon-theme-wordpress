@@ -46,6 +46,19 @@
                 </ul> -->
                 <?= get_search_form() ?>
             </div>
+            <div class="social">
+                <?php $user = wp_get_current_user(); ?>
+                <?php if ($user->ID == 0): ?>
+                    <a href="<?= bloginfo('url'); ?>/login" class="btn btn-primary" style="text-decoration: none; color: white;">Se connecter</a>
+                    <a href="<?= bloginfo('url'); ?>/register" class="btn btn-primary" style="text-decoration: none; color: white;">S'inscrire</a>
+                <?php else:  ?>
+                    Salut <?= $user->user_login; ?>
+                    <a href="<?= bloginfo('url'); ?>/profil" class="btn btn-primary"
+                        style="text-decoration: none; color: white;">Mon profil</a> |
+                    <a href="<?= bloginfo('url'); ?>/logout" class="btn btn-primary" style="text-decoration: none; color: white;">Se deconnecter</a>
+
+                <?php endif; ?>
+            </div>
         </div>
     </nav>
     <div class="container">

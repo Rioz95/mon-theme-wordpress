@@ -143,3 +143,68 @@ add_filter('manage_post_posts_custom_column', function ($column, $postId) {
         echo '<div class="bullet bullet-' . $class . '"></div>';
     }
 }, 10, 2);
+
+function montheme_pre_get_posts(WP_Query $query)
+{
+    if (is_admin() || is_search() || !$query->is_main_query()) {
+        return;
+    }
+    if (get_query_var('sponso') === 1) {
+        $meta_query = $query->get('meta_query', []);
+        $meta_query[] = [
+            'key' => SponsoMetaBox::META_KEY,
+            'compare' => 'EXISTS'
+        ];
+        $query->set('meta_query', $meta_query);
+    }
+}
+
+require_once 'widgets/Youtubewidget.php';
+
+function montheme_query_vars($params)
+{
+    $params[] = 'sopnso';
+    return $params;
+}
+
+add_action('pre_get_posts', 'montheme_pre_get_posts');
+add_filter('query_vars', 'montheme_query_vars');
+
+function montheme_register_widget()
+{
+    register_sidebar(Youtubewidget::class);
+    register_sidebar([
+        'id' => 'homepage',
+        'name' => 'Sidebar Accueil',
+        'before_widget' => '<div class="p-4 mb-3 bg-body-tertiary rounded %2$s" id="%1$s">',
+        'after_widget' => '</div>',
+        'before_title' => '<h4 class="fst-italic">',
+        'after_title' => '</h4>'
+    ]);
+}
+
+add_action('widgets_init', 'montheme_register_widget');
+
+add_action('send_headers', 'site_router');
+
+function site_router()
+{
+    $root = str_replace('index.php', '', $_SERVER['SCRIPT_NAME']);
+    $url = str_replace($root, '', $_SERVER['REQUEST_URI']);
+    $url = explode('/', $url);
+    if (count($url) == 1 && $url[0] == 'login') {
+        require 'tpl-login.php';
+        exit();
+    } elseif (count($url) == 1 && $url[0] == 'profil') {
+        require 'tpl-profil.php';
+        exit();
+    } elseif (count($url) == 1 && $url[0] == 'logout') {
+        wp_logout();
+        wp_redirect(home_url());
+        exit();
+    } elseif (count($url) == 1 && $url[0] == 'register') {
+        require 'tpl-register.php';
+        exit();
+    }
+}
+add_filter('show_admin_bar', '__return_false');
